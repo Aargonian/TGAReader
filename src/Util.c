@@ -9,7 +9,7 @@ bool read64(uint64_t *data, NY_ENDIANESS endian, FILE *file)
     uint64_t value = 0;
     check(file, "Invalid File Pointer Passed.");
     check(data, "Invalid data pointer passed.");
-    if(endian == LITTLE_ENDIAN)
+    if(endian == NY_LITTLE_ENDIAN)
     {
         check(fread(buffer, sizeof(buffer), 1, file) == 1, 
                 "Unable to read file.");
@@ -50,7 +50,7 @@ bool read32(uint32_t *data, NY_ENDIANESS endian, FILE *file)
     uint32_t value = 0;
     check(file, "Invalid File Pointer Passed.");
     check(data, "Invalid data pointer passed.");
-    if(endian == LITTLE_ENDIAN)
+    if(endian == NY_LITTLE_ENDIAN)
     {
         check(fread(buffer, sizeof(buffer), 1, file) == 1, 
                 "Unable to read file.");
@@ -83,7 +83,7 @@ bool read16(uint16_t *data, NY_ENDIANESS endian, FILE *file)
     uint16_t value = 0;
     check(file, "Invalid File Pointer Passed.");
     check(data, "Invalid data pointer passed.");
-    if(endian == LITTLE_ENDIAN)
+    if(endian == NY_LITTLE_ENDIAN)
     {
         check(fread(buffer, sizeof(buffer), 1, file) == 1, 
                 "Unable to read file.");
