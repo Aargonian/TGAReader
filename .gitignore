@@ -3,4 +3,6 @@
 *.la*
 *.a
 *.so*
+.idea/
+cmake-build-debug/
 /bin

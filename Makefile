@@ -26,7 +26,7 @@ LINTER_OPTIONS = --enable=style --inconclusive
 FLAGS = -g $(WARNINGS)
 C11_FLAGS = $(FLAGS) -std=c11 -DC11
 C99_FLAGS = $(FLAGS) -std=c99 -DC99
-CFLAGS = $(C11_FLAGS)
+CFLAGS = $(C99_FLAGS)
 CXXFLAGS = $(FLAGS) -std=c++11
 PROG_NAME = image_tester
 INCLUDE_DIR = include/
@@ -36,7 +36,8 @@ LIBS = gtk+-3.0
 # List of all files in program. Should be updated explicitly.
 FILES = src/test.c \
 	src/image.c \
-	src/tga.c \
+	src/TGAImage.c \
+	src/Decode/TGADecode.c \
         src/Util.c
 
 build:

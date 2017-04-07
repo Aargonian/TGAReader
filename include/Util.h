@@ -13,8 +13,8 @@
 #include <stdbool.h>
 
 typedef enum {
-    BIG_ENDIAN,
-    LITTLE_ENDIAN
+    NY_BIG_ENDIAN,
+    NY_LITTLE_ENDIAN
 } NY_ENDIANESS;
 
 bool read64(uint64_t *data, NY_ENDIANESS endian, FILE *file);
