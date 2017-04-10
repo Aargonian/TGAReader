@@ -167,9 +167,11 @@ error:
 
 TGAImage *read_tga_image(FILE *file)
 {
+    TGAImage *image = NULL;
+
     check(file, "Invalid file passed.");
 
-    TGAImage *image = new_tga_image(CT_NONE, 0, 0);
+    image = new_tga_image(CT_NONE, 0, 0);
     check(image, "Unable to create new TGAImage.");
     check(_read_tga_footer(image, file), "Unable to read TGA Footer.");
     check(_read_tga_header(image, file), "Unable to read TGA Header.");
