@@ -9,10 +9,9 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DDEBUG=0")
 
 set(SOURCE_FILES
         src/test.c
-	src/image.c
-	src/TGAImage.c
-	src/Decode/TGADecode.c
-	src/Util.c)
+		src/TGAImage.c
+        src/TGADecode.c
+		)
 
 IF(CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUCC_WARNINGS} -pg -O0")
