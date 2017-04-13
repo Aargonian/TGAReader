@@ -287,3 +287,8 @@ TGAError tga_error()
 {
     return TGA_ERR;
 }
+
+void tga_clear_error()
+{
+    TGA_ERR = TGA_NO_ERR;
+}

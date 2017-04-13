@@ -19,10 +19,16 @@ int main(int argc, char **argv)
 
     FILE *img_file = fopen(argv[1], "rb");
     if(!img_file)
-        return 1;
+    {
+        fprintf(stderr, "Unable to open image file.\n");
+        return tga_error();
+    }
     TGAImage *img = read_tga_image(img_file);
     if(!img)
-        return 1;
+    {
+        fprintf(stderr, "Unable to read image.");
+        return tga_error();
+    }
     print_tga_data(img);
     free_tga_image(img);
     fclose(img_file);

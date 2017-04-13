@@ -41,6 +41,7 @@ typedef struct NyTGA_Image {
 TGAError TGA_ERR;
 
 TGAError tga_error(void); /* Returns the current error, if any. */
+void tga_clear_error(void);
 TGAImage *read_tga_image(FILE *file);
 TGAImage *new_tga_image(TGAColorType type, uint8_t depth,
                         uint16_t width, uint16_t height);

@@ -143,7 +143,8 @@ static int _read_tga_image_data(TGAImage *image, FILE *file)
 {
     if(!_tga_sanity(image))
         goto error;
-    check(!image->data, TGA_IMAGE_IMMUTABLE_ERR, "Image data exists already.");
+    if(image->data)
+        free(image->data);
     check(file, TGA_INV_FILE_PNT, "Invalid File Pointer passed.");
     uint32_t offset = (uint32_t)TGA_HEADER_SIZE + image->_meta->id_length +
             (image->_meta->c_map_length * (image->_meta->c_map_depth/8)) +
