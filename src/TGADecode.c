@@ -89,7 +89,7 @@ static int _read_tga_header(TGAImage *image, FILE *file)
             "Unable to seek to beginning of file.");
 
     check(fread(&data, TGA_HEADER_SIZE, 1, file) == 1, TGA_READ_ERR,
-          "Unable to read file.");
+            "Unable to read file.");
     image->_meta->id_length = data[0];
     image->_meta->c_map_type = data[1];
     image->_meta->image_type = data[2];
@@ -113,15 +113,15 @@ static int _read_tga_id_field(TGAImage *image, FILE *file)
     check(file, TGA_INV_FILE_PNT, "Invalid File.");
     check(image, TGA_INV_IMAGE_PNT, "Invalid Image Pointer.");
     check(image->_meta->id_length != 0, TGA_INTERNAL_ERR,
-          "TGA Image ID Length is 0. This should not have been called.");
+            "TGA Image ID Length is 0. This should not have been called.");
 
     image->id_field = malloc(image->_meta->id_length);
     check(image->id_field, TGA_MEM_ERR,
-          "Unable to allocate memory for TGA ID Field.");
+            "Unable to allocate memory for TGA ID Field.");
 
     if(ftell(file) != 18) /*Unlikely, assuming no problems, but never assume.*/
         check(fseek(file, 18, SEEK_SET) == 0, TGA_GEN_IO_ERR,
-              "Unable to seek to ID Field.");
+                "Unable to seek to ID Field.");
 
     check(fread(image->id_field, image->_meta->id_length, 1, file) == 1,
             TGA_READ_ERR, "Unable to read ID Field from file.");
@@ -151,7 +151,7 @@ static int _read_tga_image_data(TGAImage *image, FILE *file)
             image->_meta->c_map_start;
     if(ftell(file) != offset)
         check(fseek(file, offset, SEEK_SET) == 0, TGA_GEN_IO_ERR,
-              "Unable to seek to data offset.");
+                "Unable to seek to data offset.");
 
     uint8_t depth_mult = (uint8_t)((image->_meta->pixel_depth+7) / 8);
     uint32_t total = image->_meta->width * image->_meta->height * depth_mult;
@@ -180,23 +180,23 @@ TGAImage *read_tga_image(FILE *file)
     image = new_tga_image(TGA_NO_DATA, 0, 0, 0);
     check(image, tga_error(), "Unable to create new TGAImage.");
     check(_read_tga_footer(image, file), tga_error(),
-          "Unable to read TGA Footer.");
+            "Unable to read TGA Footer.");
     check(_read_tga_header(image, file), tga_error(),
-          "Unable to read TGA Header.");
+            "Unable to read TGA Header.");
 
     if(image->_meta->id_length)
         check(_read_tga_id_field(image, file), tga_error(),
-              "Unable to read TGA ID Field.");
+                "Unable to read TGA ID Field.");
     else
         image->id_field = NULL;
 
     if(image->_meta->c_map_type == TGA_COLOR_MAPPED ||
         image->_meta->c_map_type == TGA_ENCODED_COLOR_MAPPED)
         fail(TGA_UNSUPPORTED,
-             "Unfortunately, ColorMapped TGA Files are not yet supported.");
+                "Unfortunately, ColorMapped TGA Files are not yet supported.");
 
     check(_read_tga_image_data(image, file), tga_error(),
-          "Unable to read TGA Image Data.");
+            "Unable to read TGA Image Data.");
     return image;
 
 error:

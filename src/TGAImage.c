@@ -28,43 +28,44 @@ error:
 TGAImage *new_tga_image(TGAColorType ct, uint8_t depth,
                         uint16_t width, uint16_t height)
 {
-    TGAImage *img = malloc(sizeof(TGAImage));
-    check(img, TGA_MEM_ERR, "Unable to allocate memory for new TGAImage.");
-    img->_meta = malloc(sizeof(struct _NY_TgaMeta));
-    check(img->_meta, TGA_MEM_ERR, "Unable to allocate memory for TGA Metadata.");
-    img->id_field = NULL;
-    img->version = 2;
-    memset(img->__padding, '\0', sizeof(img->__padding));
+    TGAImage *image = malloc(sizeof(TGAImage));
+    check(image, TGA_MEM_ERR, "Unable to allocate memory for new TGAImage.");
+    image->_meta = malloc(sizeof(struct _NY_TgaMeta));
+    check(image->_meta, TGA_MEM_ERR, "Unable to allocate memory for TGA Metadata.");
+    image->id_field = NULL;
+    image->version = 2;
+    memset(image->__padding, '\0', sizeof(image->__padding));
 
-    if(!_allocate_tga_data(img, depth, width, height))
-        goto error; /* allocate will have set err already. */
+    if(ct != TGA_NO_DATA)
+        if(!_allocate_tga_data(image, depth, width, height))
+            goto error; /* allocate will have set err already. */
 
-    img->_meta->extension_offset = 0;
-    img->_meta->developer_offset = 0;
-    img->_meta->c_map_length = 0;
-    img->_meta->x_offset = 0;
-    img->_meta->y_offset = 0;
-    img->_meta->width = 0;
-    img->_meta->height = 0;
-    img->_meta->c_map_start = 0;
-    img->_meta->id_length = 0;
-    img->_meta->c_map_type = 0;
-    img->_meta->image_type = 0;
-    img->_meta->pixel_depth = 0;
-    img->_meta->c_map_depth = 0;
-    img->_meta->image_descriptor = 0;
-    memset(img->_meta->__padding, '\0', sizeof(img->_meta->__padding));
+    image->_meta->extension_offset = 0;
+    image->_meta->developer_offset = 0;
+    image->_meta->c_map_length = 0;
+    image->_meta->x_offset = 0;
+    image->_meta->y_offset = 0;
+    image->_meta->width = 0;
+    image->_meta->height = 0;
+    image->_meta->c_map_start = 0;
+    image->_meta->id_length = 0;
+    image->_meta->c_map_type = 0;
+    image->_meta->image_type = 0;
+    image->_meta->pixel_depth = 0;
+    image->_meta->c_map_depth = 0;
+    image->_meta->image_descriptor = 0;
+    memset(image->_meta->__padding, '\0', sizeof(image->_meta->__padding));
 
-    return img;
+    return image;
 
 error:
-    if(img)
+    if(image)
     {
-        if(img->_meta)
-            free(img->_meta);
-        if(img->id_field)
-            free(img->id_field);
-        free(img);
+        if(image->_meta)
+            free(image->_meta);
+        if(image->id_field)
+            free(image->id_field);
+        free(image);
     }
     return NULL;
 }
