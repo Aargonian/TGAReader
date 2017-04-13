@@ -171,6 +171,9 @@ error:
 
 /* Most errors in this subroutine are already set by the lower-level functions.
  * So the error is set using tga_error() to fetch the existing error. */
+/* TODO: Implement reading for ColorMapped TGA Images. */
+/* TODO: Implement reading for Encoded TGA Images. */
+/* TODO: Implement reading for developer/extension areas. */
 TGAImage *read_tga_image(FILE *file)
 {
     TGAImage *image = NULL;
@@ -190,10 +193,21 @@ TGAImage *read_tga_image(FILE *file)
     else
         image->id_field = NULL;
 
-    if(image->_meta->c_map_type == TGA_COLOR_MAPPED ||
-        image->_meta->c_map_type == TGA_ENCODED_COLOR_MAPPED)
+    if(image->_meta->image_type == TGA_COLOR_MAPPED ||
+        image->_meta->image_type == TGA_ENCODED_COLOR_MAPPED ||
+        image->_meta->image_type == TGA_ENCODED_TRUECOLOR    ||
+        image->_meta->image_type == TGA_ENCODED_MONOCHROME)
         fail(TGA_UNSUPPORTED,
-                "Unfortunately, ColorMapped TGA Files are not yet supported.");
+                "Unfortunately, ColorMapped and/or encoded TGA Files aren't"
+                "supported yet.");
+
+    printf("TGA DATA CURRENTLY KNOWN: \n");
+    printf("TGA WIDTH: %d\n", tga_get_width(image));
+    printf("TGA HEIGHT: %d\n", tga_get_height(image));
+    printf("TGA DEPTH: %d\n", tga_get_pixel_depth(image));
+    printf("TGA COLOR_MAP TYPE: %d\n", tga_get_color_map_type(image));
+    printf("TGA HAS COLOR MAP: %d\n", tga_has_color_map(image));
+    printf("TGA IMAGE TYPE: %d\n", tga_get_image_type(image));
 
     check(_read_tga_image_data(image, file), tga_error(),
             "Unable to read TGA Image Data.");
