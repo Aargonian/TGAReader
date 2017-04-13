@@ -4,9 +4,20 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include <Image.h>
+typedef enum {
+    TGA_NO_ERR = 0,
+    TGA_INV_IMAGE_PNT,
+    TGA_INV_FILE_PNT,
+    TGA_MEM_ERR,
+    TGA_GEN_IO_ERR,
+    TGA_READ_ERR,
+    TGA_WRITE_ERR,
+    TGA_IMAGE_IMMUTABLE_ERR,
+    TGA_UNSUPPORTED,
+    TGA_INTERNAL_ERR
+} TGAError;
 
-typedef enum _NY_TGA_COLOR_TYPE {
+typedef enum {
     TGA_NO_DATA = 0,
     TGA_COLOR_MAPPED = 1,
     TGA_TRUECOLOR = 2,
@@ -27,8 +38,12 @@ typedef struct NyTGA_Image {
     char __padding[7];
 } TGAImage; /* SIZEOF == 24 */
 
+TGAError TGA_ERR;
+
+TGAError tga_error(void); /* Returns the current error, if any. */
 TGAImage *read_tga_image(FILE *file);
-TGAImage *new_tga_image(ChannelType type, uint16_t width, uint16_t height);
+TGAImage *new_tga_image(TGAColorType type, uint8_t depth,
+                        uint16_t width, uint16_t height);
 void free_tga_image(TGAImage* image);
 
 /* Getters */
@@ -53,30 +68,5 @@ uint32_t tga_get_developer_offset(TGAImage *image);
 uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y);
-
-/* Setters */
-Image *tga_to_generic(TGAImage *img);
-
-/*
-struct _NY_TgaMeta {
-    uint32_t extension_offset;
-    uint32_t developer_offset;
-
-    uint16_t c_map_length;
-    uint16_t x_offset;
-    uint16_t y_offset;
-    uint16_t width;
-    uint16_t height;
-    uint16_t c_map_start;
-
-    uint8_t id_length;
-    uint8_t c_map_type;
-    uint8_t image_type;
-    uint8_t pixel_depth;
-    uint8_t c_map_depth;
-    uint8_t image_descriptor;
-    char padding[2];
-}; SIZEOF == 28
-*/
 
 #endif/*__NY_TGA_FILE*/
