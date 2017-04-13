@@ -32,7 +32,7 @@
     #define check(A, _NY_ERR, ...)                                             \
         do {                                                                   \
             if(!(A)) {                                                         \
-                fprintf(stderr, __ERR_TEXT, __FILE__, __LINE__, errno_str())   \
+                fprintf(stderr, __ERR_TEXT, __FILE__, __LINE__, errno_str());  \
                 fprintf(stderr, __VA_ARGS__);                                  \
                 fprintf(stderr, "\n");                                         \
                 TGA_ERR = _NY_ERR;                                             \

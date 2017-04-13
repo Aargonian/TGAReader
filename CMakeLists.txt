@@ -7,7 +7,7 @@ set(GNUCC_WARNINGS "-Wall -pedantic -Wextra -Wformat -Wcast-align              \
         -Wnested-externs -Wcast-qual -Wshadow -Wwrite-strings                  \
         -Wunused-parameter -Wfloat-equal")
 
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -DDEBUG=1")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -D_TGA_DEBUG=1")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DDEBUG=0")
 
 
@@ -20,6 +20,8 @@ set(SOURCE_FILES
 IF (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUCC_WARNINGS} -pg -O0")
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_TGA_DEBUG=1")
 
 add_executable(TGAReader ${SOURCE_FILES})
 
