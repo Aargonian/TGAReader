@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     TGAImage *img = read_tga_image(img_file);
     if(!img)
     {
-        fprintf(stderr, "Unable to read image.");
+        fprintf(stderr, "Unable to read image. ERROR: %d\n", tga_error());
         return tga_error();
     }
     print_tga_data(img);

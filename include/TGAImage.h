@@ -5,27 +5,27 @@
 #include <stdint.h>
 
 typedef enum {
-    TGA_NO_ERR = 0,
-    TGA_INV_IMAGE_PNT,
-    TGA_INV_FILE_PNT,
-    TGA_MEM_ERR,
-    TGA_GEN_IO_ERR,
-    TGA_READ_ERR,
-    TGA_WRITE_ERR,
-    TGA_IMAGE_IMMUTABLE_ERR,
-    TGA_UNSUPPORTED,
-    TGA_INTERNAL_ERR
+    TGA_NO_ERR                  = 0,
+    TGA_INV_IMAGE_PNT           = 1,
+    TGA_INV_FILE_PNT            = 2,
+    TGA_MEM_ERR                 = 3,
+    TGA_GEN_IO_ERR              = 4,
+    TGA_READ_ERR                = 5,
+    TGA_WRITE_ERR               = 6,
+    TGA_IMAGE_IMMUTABLE_ERR     = 7,
+    TGA_UNSUPPORTED             = 8,
+    TGA_INTERNAL_ERR            = 9
 } TGAError;
 
 typedef enum {
-    TGA_NO_DATA = 0,
-    TGA_COLOR_MAPPED = 1,
-    TGA_TRUECOLOR = 2,
-    TGA_MONOCHROME = 3,
-    TGA_ENCODED_COLOR_MAPPED = 9,
-    TGA_ENCODED_TRUECOLOR = 10,
-    TGA_ENCODED_MONOCHROME = 11,
-    TGA_INVALID_TYPE = 255
+    TGA_NO_DATA                 = 0,
+    TGA_COLOR_MAPPED            = 1,
+    TGA_TRUECOLOR               = 2,
+    TGA_MONOCHROME              = 3,
+    TGA_ENCODED_COLOR_MAPPED    = 9,
+    TGA_ENCODED_TRUECOLOR       = 10,
+    TGA_ENCODED_MONOCHROME      = 11,
+    TGA_INVALID_TYPE            = 255
 } TGAColorType;
 
 struct _NY_TgaMeta;

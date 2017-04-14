@@ -21,8 +21,6 @@ IF (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUCC_WARNINGS} -pg -O0")
 ENDIF (CMAKE_COMPILER_IS_GNUCC)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_TGA_DEBUG=1")
-
 add_executable(TGAReader ${SOURCE_FILES})
 
 target_include_directories(TGAReader PUBLIC ${CMAKE_SOURCE_DIR}/include)
