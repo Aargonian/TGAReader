@@ -11,7 +11,7 @@ interest is appreciated. Eventually I would like to have some convenience functi
 TGA images into other libraries (e.g. loading into a pixbuf for gdk/gtk+), but that is sometime off
 in the future.
 
-##Building
+## Building
 
 To build the project, simply make a build folder and run cmake.
 
