@@ -25,7 +25,7 @@ typedef enum {
     TGA_ENCODED_COLOR_MAPPED    = 9,
     TGA_ENCODED_TRUECOLOR       = 10,
     TGA_ENCODED_MONOCHROME      = 11,
-    TGA_INVALID_TYPE            = 255
+    TGA_UNKNOWN_TYPE            = 255
 } TGAColorType;
 
 struct _NY_TgaMeta;

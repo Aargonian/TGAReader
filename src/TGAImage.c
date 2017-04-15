@@ -94,7 +94,8 @@ error:
 
 uint8_t tga_has_color_map(TGAImage *image)
 {
-    return tga_get_color_map_type(image);
+    return image->_meta->c_map_type == TGA_COLOR_MAPPED ||
+           image->_meta->c_map_type == TGA_ENCODED_COLOR_MAPPED;
 }
 
 uint8_t tga_get_color_map_type(TGAImage *image)
@@ -117,7 +118,7 @@ TGAColorType tga_get_image_type(TGAImage *image)
         case TGA_ENCODED_COLOR_MAPPED: return TGA_ENCODED_COLOR_MAPPED;
         case TGA_ENCODED_TRUECOLOR: return TGA_ENCODED_TRUECOLOR;
         case TGA_ENCODED_MONOCHROME: return TGA_ENCODED_MONOCHROME;
-        default: return TGA_INVALID_TYPE;
+        default: return TGA_UNKNOWN_TYPE;
     }
 error:
     return TGA_NO_DATA;
