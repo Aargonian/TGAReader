@@ -200,15 +200,6 @@ TGAImage *read_tga_image(FILE *file)
         fail(TGA_UNSUPPORTED,
                 "Unfortunately, ColorMapped and/or encoded TGA Files aren't"
                 "supported yet.");
-
-    printf("TGA DATA CURRENTLY KNOWN: \n");
-    printf("TGA WIDTH: %d\n", tga_get_width(image));
-    printf("TGA HEIGHT: %d\n", tga_get_height(image));
-    printf("TGA DEPTH: %d\n", tga_get_pixel_depth(image));
-    printf("TGA COLOR_MAP TYPE: %d\n", tga_get_color_map_type(image));
-    printf("TGA HAS COLOR MAP: %d\n", tga_has_color_map(image));
-    printf("TGA IMAGE TYPE: %d\n", tga_get_image_type(image));
-
     check(_read_tga_image_data(image, file), tga_error(),
             "Unable to read TGA Image Data.");
     return image;
