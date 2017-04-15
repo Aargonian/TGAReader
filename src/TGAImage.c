@@ -206,8 +206,8 @@ error:
 void tga_get_origin_coordinates(TGAImage *image, int *x, int *y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
-    *x = (8 & image->_meta->image_descriptor) > 0; /*00001000*/
-    *y = (4 & image->_meta->image_descriptor) > 0; /*00000100*/
+    *y = (32 & image->_meta->image_descriptor) > 0; /*00100000*/
+    *x = (16 & image->_meta->image_descriptor) > 0; /*00010000*/
 error:
     *x = *y = 0;
 }
@@ -215,7 +215,7 @@ error:
 uint8_t tga_get_attribute_bits(TGAImage *image)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
-    return (image->_meta->image_descriptor & ((uint8_t)240)) >> 4; /*11110000*/
+    return image->_meta->image_descriptor & (uint8_t)15; /*00001111*/
 error:
     return 0;
 }
