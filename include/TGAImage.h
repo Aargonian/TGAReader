@@ -8,14 +8,15 @@ typedef enum {
     TGA_NO_ERR                  = 0,
     TGA_INV_IMAGE_PNT           = 1,
     TGA_INV_FILE_PNT            = 2,
-    TGA_MEM_ERR                 = 3,
-    TGA_GEN_IO_ERR              = 4,
-    TGA_READ_ERR                = 5,
-    TGA_WRITE_ERR               = 6,
-    TGA_INV_FILE_NAME           = 7,
-    TGA_IMAGE_IMMUTABLE_ERR     = 8,
-    TGA_UNSUPPORTED             = 9,
-    TGA_INTERNAL_ERR            = 10
+    TGA_COLOR_MAP_ERR           = 3,
+    TGA_MEM_ERR                 = 4,
+    TGA_GEN_IO_ERR              = 5,
+    TGA_READ_ERR                = 6,
+    TGA_WRITE_ERR               = 7,
+    TGA_INV_FILE_NAME           = 8,
+    TGA_IMAGE_IMMUTABLE_ERR     = 9,
+    TGA_UNSUPPORTED             = 10,
+    TGA_INTERNAL_ERR            = 255
 } TGAError;
 
 typedef enum {
@@ -34,6 +35,7 @@ struct _NY_TgaMeta;
 typedef struct NyTGA_Image {
     uint8_t *id_field;
     uint8_t *data;
+    uint8_t *color_map;
     struct _NY_TgaMeta *_meta;
     uint8_t version;
     char __padding[7];

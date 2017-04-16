@@ -138,6 +138,32 @@ error:
     return 0;
 }
 
+static int _read_tga_color_map(TGAImage *image, FILE *file)
+{
+    uint16_t c_map_size = 0;
+    uint16_t start = 0;
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    check(file, TGA_INV_FILE_PNT, "Invalid File Pointer.");
+    check(image->_meta->image_type == TGA_COLOR_MAPPED, TGA_INTERNAL_ERR,
+            "Image is not color-mapped. This should not have been called.");
+    c_map_size = ((image->_meta->c_map_depth+7)/8) * image->_meta->c_map_length;
+    check(c_map_size > 0, TGA_COLOR_MAP_ERR, "Image claims color map, but "
+            "map is of size 0.");
+
+    start = TGA_HEADER_SIZE + image->_meta->id_length +
+            image->_meta->c_map_start;
+    check(fseek(file, start, SEEK_SET) == 0, TGA_GEN_IO_ERR,
+            "Unable to seek to color map start.");
+
+    image->color_map = malloc(sizeof(uint8_t) * c_map_size);
+    check(image->color_map, TGA_MEM_ERR, "Unable to allocate color map.");
+    check(fread(image->color_map, c_map_size, 1, file) == 1, TGA_READ_ERR,
+            "Unable to read Color Map.");
+    return 1;
+error:
+    return 0;
+}
+
 static int _read_tga_image_data(TGAImage *image, FILE *file)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
@@ -169,7 +195,6 @@ error:
 
 /* Most errors in this subroutine are already set by the lower-level functions.
  * So the error is set using tga_error() to fetch the existing error. */
-/* TODO: Implement reading for ColorMapped TGA Images. */
 /* TODO: Implement reading for Encoded TGA Images. */
 /* TODO: Implement reading for developer/extension areas. */
 TGAImage *read_tga_image(FILE *file)
@@ -191,8 +216,12 @@ TGAImage *read_tga_image(FILE *file)
     else
         image->id_field = NULL;
 
-    if(image->_meta->image_type == TGA_COLOR_MAPPED ||
-        image->_meta->image_type == TGA_ENCODED_COLOR_MAPPED ||
+    if(image->_meta->image_type == TGA_COLOR_MAPPED)
+        check(_read_tga_color_map(image, file), tga_error(),
+            "Unable to read TGA ColorMap Data.");
+
+
+    if(image->_meta->image_type == TGA_ENCODED_COLOR_MAPPED ||
         image->_meta->image_type == TGA_ENCODED_TRUECOLOR    ||
         image->_meta->image_type == TGA_ENCODED_MONOCHROME)
         fail(TGA_UNSUPPORTED,
