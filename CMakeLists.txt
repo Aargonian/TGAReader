@@ -15,6 +15,7 @@ set(SOURCE_FILES
         src/test.c
         src/TGAImage.c
         src/TGADecode.c
+        src/TGAEncode.c
         )
 
 IF (CMAKE_COMPILER_IS_GNUCC)

@@ -12,9 +12,10 @@ typedef enum {
     TGA_GEN_IO_ERR              = 4,
     TGA_READ_ERR                = 5,
     TGA_WRITE_ERR               = 6,
-    TGA_IMAGE_IMMUTABLE_ERR     = 7,
-    TGA_UNSUPPORTED             = 8,
-    TGA_INTERNAL_ERR            = 9
+    TGA_INV_FILE_NAME           = 7,
+    TGA_IMAGE_IMMUTABLE_ERR     = 8,
+    TGA_UNSUPPORTED             = 9,
+    TGA_INTERNAL_ERR            = 10
 } TGAError;
 
 typedef enum {
@@ -43,6 +44,7 @@ TGAError TGA_ERR;
 TGAError tga_error(void); /* Returns the current error, if any. */
 void tga_clear_error(void);
 TGAImage *read_tga_image(FILE *file);
+int write_tga_image(TGAImage *image, const char *filename);
 TGAImage *new_tga_image(TGAColorType type, uint8_t depth,
                         uint16_t width, uint16_t height);
 void free_tga_image(TGAImage* image);
