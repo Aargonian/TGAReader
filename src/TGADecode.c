@@ -78,12 +78,11 @@ error:
  */
 static int _read_tga_header(TGAImage *image, FILE *file)
 {
-    uint8_t data[TGA_HEADER_SIZE];
+    uint8_t data[TGA_HEADER_SIZE] = {0};
 
     /* Sanity Checks */
-    if(!_tga_sanity(image))
-        goto error;
-    check(file, TGA_INV_IMAGE_PNT, "Invalid File Pointer Passed.");
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    check(file, TGA_INV_FILE_PNT, "Invalid File Pointer Passed.");
     /* Ensure that we are at the beginning of the file. */
     check(fseek(file, 0, SEEK_SET) == 0, TGA_GEN_IO_ERR,
             "Unable to seek to beginning of file.");
@@ -111,7 +110,7 @@ error:
 static int _read_tga_id_field(TGAImage *image, FILE *file)
 {
     check(file, TGA_INV_FILE_PNT, "Invalid File.");
-    check(image, TGA_INV_IMAGE_PNT, "Invalid Image Pointer.");
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
     check(image->_meta->id_length != 0, TGA_INTERNAL_ERR,
             "TGA Image ID Length is 0. This should not have been called.");
 
@@ -119,8 +118,8 @@ static int _read_tga_id_field(TGAImage *image, FILE *file)
     check(image->id_field, TGA_MEM_ERR,
             "Unable to allocate memory for TGA ID Field.");
 
-    if(ftell(file) != 18) /*Unlikely, assuming no problems, but never assume.*/
-        check(fseek(file, 18, SEEK_SET) == 0, TGA_GEN_IO_ERR,
+    if(ftell(file) != TGA_HEADER_SIZE)
+        check(fseek(file, TGA_HEADER_SIZE, SEEK_SET) == 0, TGA_GEN_IO_ERR,
                 "Unable to seek to ID Field.");
 
     check(fread(image->id_field, image->_meta->id_length, 1, file) == 1,
@@ -141,8 +140,7 @@ error:
 
 static int _read_tga_image_data(TGAImage *image, FILE *file)
 {
-    if(!_tga_sanity(image))
-        goto error;
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
     if(image->data)
         free(image->data);
     check(file, TGA_INV_FILE_PNT, "Invalid File Pointer passed.");
