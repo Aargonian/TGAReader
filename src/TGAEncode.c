@@ -55,7 +55,7 @@ static int _write_tga_image_data(TGAImage *image, FILE *file)
     check(file, TGA_INV_FILE_PNT, "Invalid File Pointer.");
 
     if(image->_meta->image_type == TGA_NO_DATA ||
-        image->_meta->image_type == TGA_INVALID_TYPE)
+        image->_meta->image_type == TGA_UNKNOWN_TYPE)
         return 1; /* No Data to be written, according to meta-data. */
 
     depth = (uint8_t)((image->_meta->pixel_depth + 7) / 8);
