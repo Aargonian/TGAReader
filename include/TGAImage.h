@@ -39,9 +39,8 @@ typedef struct NyTGA_Image {
     char __padding[7];
 } TGAImage; /* SIZEOF == 24 */
 
-TGAError TGA_ERR;
-
 TGAError tga_error(void); /* Returns the current error, if any. */
+char *tga_error_str(void); /* Returns a string with error details. */
 void tga_clear_error(void);
 TGAImage *read_tga_image(FILE *file);
 int write_tga_image(TGAImage *image, const char *filename);

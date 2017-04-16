@@ -4,15 +4,14 @@
 #include <TGAImage.h>
 #include "Private/TGAPrivate.h"
 
+TGAError tga_err = TGA_NO_ERR;
+char tga_err_string[TGA_ERR_MAX] = {0};
+
 static int _allocate_tga_data(TGAImage *image, uint8_t depth,
                               uint16_t width, uint16_t height)
 {
     int bytes = (depth + 7)/8;
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGA Image.");
-    if(!_tga_sanity(image)) {
-        TGA_ERR = TGA_INV_IMAGE_PNT;
-        goto error;
-    }
     image->data = malloc(bytes * sizeof(uint8_t) * width * height);
     check(image->data, TGA_MEM_ERR, "Out of memory.");
     return 1;
@@ -285,12 +284,18 @@ error:
     return 0;
 }
 
-TGAError tga_error()
+TGAError tga_error(void)
 {
-    return TGA_ERR;
+    return tga_err;
 }
 
-void tga_clear_error()
+char *tga_error_str(void)
 {
-    TGA_ERR = TGA_NO_ERR;
+    return tga_err_string;
+}
+
+void tga_clear_error(void)
+{
+    tga_err = TGA_NO_ERR;
+    memset(tga_err_string, 0, TGA_ERR_MAX);
 }
