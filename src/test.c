@@ -11,9 +11,9 @@ static void print_tga_data(TGAImage *img)
 
 int main(int argc, char **argv)
 {
-    if(argc != 2)
+    if(argc != 3)
     {
-        fprintf(stderr, "USAGE: TGAReader <image>\n");
+        fprintf(stderr, "USAGE: TGAReader <image> <newname>\n");
         return 1;
     }
 
@@ -30,6 +30,7 @@ int main(int argc, char **argv)
         return tga_error();
     }
     print_tga_data(img);
+    write_tga_image(img, argv[2]);
     free_tga_image(img);
     fclose(img_file);
     return 0;
