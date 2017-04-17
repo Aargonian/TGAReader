@@ -164,7 +164,73 @@ error:
     return 0;
 }
 
-static int _read_tga_image_data(TGAImage *image, FILE *file)
+/* TODO: Implement Reading Color-Mapped Encoded Images. */
+static int _read_encoded_tga_image_data(TGAImage *image, FILE *file)
+{
+    uint16_t line = 0;
+    uint32_t offset = (uint32_t)TGA_HEADER_SIZE + image->_meta->id_length +
+            (image->_meta->c_map_length * (image->_meta->c_map_depth/8)) +
+            image->_meta->c_map_start;
+    uint8_t depth = (uint8_t)((image->_meta->pixel_depth+7)/8);
+    uint32_t total = image->_meta->width * image->_meta->height * depth;
+    uint8_t packet = 0;
+    uint8_t current_packet_cnt = 0;
+    uint16_t current_line_pos = 0;
+    uint8_t current_pixel = 0;
+    uint32_t data_offset = 0;
+    uint8_t *run_packet = malloc(sizeof(uint8_t)*depth);
+
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    check(file, TGA_INV_FILE_PNT, "Invalid File Pointer.");
+    check(image->_meta->image_type != TGA_ENCODED_COLOR_MAPPED, TGA_UNSUPPORTED,
+            "Unfortunately, Encoded Color Map Images are not supported yet.");
+    check(image->_meta->image_type == TGA_ENCODED_TRUECOLOR ||
+            image->_meta->image_type == TGA_ENCODED_MONOCHROME,
+            TGA_INTERNAL_ERR, "Not encoded image. Should not have been called");
+    check(fseek(file, offset, SEEK_SET) == 0, TGA_GEN_IO_ERR,
+            "Unable to seek to data begining.");
+
+    image->data = malloc(sizeof(uint8_t) * total);
+
+    for(line = 0; line < image->_meta->height-1; line++)
+    {
+        current_line_pos = 0; /* In Pixels, Not Bytes */
+        while(current_line_pos < image->_meta->width)
+        {
+            check(fread(&packet, sizeof(packet), 1, file) == 1,
+                    TGA_READ_ERR, "Failed to read packet");
+            current_packet_cnt = (packet & 127) + 1; /* Als in Pixels */
+
+            /* Offset from beginning, in bytes, hence multiply by depth */
+            data_offset = (current_line_pos + (line*image->_meta->width))*depth;
+
+            if(packet & 128) /*X & 10000000b */
+            {
+                /* Run-length packet, copy the following value count times */
+                check(fread(run_packet, depth, 1, file) == 1, TGA_READ_ERR,
+                        "Failed to read RLE pixel packet.");
+                for(current_pixel = 0; current_pixel < current_packet_cnt; current_pixel++)
+                    memcpy(image->data+data_offset+(depth*current_pixel),
+                            run_packet, depth);
+            }
+            else
+            {
+                /* Raw-packet, read the following cnt values */
+                check(fread(image->data+data_offset, depth,
+                            current_packet_cnt, file) == current_packet_cnt,
+                        TGA_READ_ERR, "Unable to read Raw Pixel Values.");
+            }
+            current_line_pos += current_packet_cnt;
+        }
+    }
+    return 1;
+error:
+    if(image->data)
+        free(image->data);
+    return 0;
+}
+
+static int _read_unencoded_tga_image_data(TGAImage *image, FILE *file)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
     if(image->data)
@@ -220,15 +286,28 @@ TGAImage *read_tga_image(FILE *file)
         check(_read_tga_color_map(image, file), tga_error(),
             "Unable to read TGA ColorMap Data.");
 
+    switch(image->_meta->image_type)
+    {
+        case TGA_ENCODED_TRUECOLOR:
+            check(_read_encoded_tga_image_data(image, file), tga_error(),
+                    "Unable to read Encoded Truecolor TGA Image Data.");
+            image->_meta->image_type = TGA_TRUECOLOR;
+            break;
+        case TGA_ENCODED_MONOCHROME:
+            check(_read_encoded_tga_image_data(image, file), tga_error(),
+                    "Unable to read Encoded Monochrome TGA Image Data.");
+            image->_meta->image_type = TGA_MONOCHROME;
+            break;
+        case TGA_TRUECOLOR:
+        case TGA_MONOCHROME:
+        case TGA_COLOR_MAPPED:
+            check(_read_unencoded_tga_image_data(image, file), tga_error(),
+                    "Unable to read TGA Image Data.");
+            break;
+        default:
+            fail(TGA_UNSUPPORTED, "Unsupported TGA Format.");
+    }
 
-    if(image->_meta->image_type == TGA_ENCODED_COLOR_MAPPED ||
-        image->_meta->image_type == TGA_ENCODED_TRUECOLOR    ||
-        image->_meta->image_type == TGA_ENCODED_MONOCHROME)
-        fail(TGA_UNSUPPORTED,
-                "Unfortunately, ColorMapped and/or encoded TGA Files aren't"
-                "supported yet.");
-    check(_read_tga_image_data(image, file), tga_error(),
-            "Unable to read TGA Image Data.");
     return image;
 
 error:
