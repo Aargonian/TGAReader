@@ -199,7 +199,7 @@ static int _read_encoded_tga_image_data(TGAImage *image, FILE *file)
         {
             check(fread(&packet, sizeof(packet), 1, file) == 1,
                     TGA_READ_ERR, "Failed to read packet");
-            current_packet_cnt = (packet & 127) + 1; /* Als in Pixels */
+            current_packet_cnt = (packet & 127) + 1; /* Also in Pixels */
 
             /* Offset from beginning, in bytes, hence multiply by depth */
             data_offset = (current_line_pos + (line*image->_meta->width))*depth;
