@@ -220,18 +220,27 @@ error:
     return 0;
 }
 
+/* TODO: Implement for all pixel depths and TGA Types */
+/* IMPLEMENTED: TGA_TRUECOLOR, TGA_MONOCHROME */
 static uint8_t *_get_pixel_point_at(TGAImage *image, uint16_t x, uint16_t y)
 {
-    uint8_t depth_mult = (image->_meta->pixel_depth + ((uint8_t)7)) /(uint8_t)8;
-    uint32_t row_width = image->_meta->width * depth_mult;
-    return image->data + (y * row_width) + (x * depth_mult);
+    uint8_t depth = (uint8_t)(tga_get_pixel_depth(image)+7)/8;
+    uint32_t row_width = tga_get_width(image)*depth;
+    return image->data + (y * row_width) + (x * depth);
 }
 
 uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    /*check(tga_get_image_type(image) != TGA_MONOCHROME &&
+            tga_get_image_type(image) != TGA_ENCODED_MONOCHROME,
+            TGA_IMAGE_TYPE_ERR,
+            "Attempted to get red channel on Monochrome image.");*/
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
-    switch(image->_meta->pixel_depth)
+
+    uint8_t calc_depth =
+            tga_get_pixel_depth(image)-tga_get_attribute_bits(image);
+    switch(calc_depth)
     {
         case 8:
             return pixel[0];
@@ -250,7 +259,7 @@ uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
-    switch(image->_meta->pixel_depth)
+    switch(tga_get_pixel_depth(image))
     {
         case 8:
             return pixel[0];
@@ -269,7 +278,7 @@ uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
-    switch(image->_meta->pixel_depth)
+    switch(tga_get_pixel_depth(image))
     {
         case 8:
             return pixel[0];
@@ -280,6 +289,26 @@ uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y)
         default:
             fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
     }
+error:
+    return 0;
+}
+
+/* TODO: THIS IS NOT FINISHED! */
+uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red)
+{
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    switch(tga_get_pixel_depth(image))
+    {
+        case 24:
+            pixel[2] = red;
+            break;
+        case 32:
+            pixel[3] = red;
+            break;
+        default:
+            fail(TGA_UNSUPPORTED, "Not Supported Depth Yet.");
+    }
+    return 1;
 error:
     return 0;
 }

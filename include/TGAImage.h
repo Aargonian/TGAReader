@@ -73,4 +73,8 @@ uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y);
 
+uint8_t tga_set_red_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t red);
+uint8_t tga_set_green_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t green);
+uint8_t tga_set_blue_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t blue);
+
 #endif/*__NY_TGA_FILE*/
