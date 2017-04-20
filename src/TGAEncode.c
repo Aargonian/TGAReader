@@ -75,7 +75,8 @@ int write_tga_image(TGAImage *image, const char* filename)
 {
     FILE *file = NULL;
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
-    check(image->_meta->image_type == TGA_TRUECOLOR, TGA_UNSUPPORTED,
+    check(image->_meta->image_type == TGA_TRUECOLOR ||
+            image->_meta->image_type == TGA_MONOCHROME, TGA_UNSUPPORTED,
             "Currently, only writing for TRUECOLOR TGA Images is supported.");
     check(image->version == 1 || image->version == 2, TGA_UNSUPPORTED,
             "Unsupported TGA Version.");
