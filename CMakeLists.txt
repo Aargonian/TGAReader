@@ -12,10 +12,12 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DDEBUG=0")
 
 
 set(SOURCE_FILES
+		include/TGAImage.h
         src/test.c
         src/TGAImage.c
         src/TGADecode.c
         src/TGAEncode.c
+		src/Private/TGAPrivate.h
         )
 
 IF (CMAKE_COMPILER_IS_GNUCC)
