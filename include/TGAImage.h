@@ -14,9 +14,9 @@ typedef enum {
     TGA_READ_ERR                = 6,
     TGA_WRITE_ERR               = 7,
     TGA_INV_FILE_NAME           = 8,
-    TGA_IMAGE_IMMUTABLE_ERR     = 9,
     TGA_UNSUPPORTED             = 10,
     TGA_TYPE_ERR                = 11,
+    TGA_ARG_ERR                 = 12,
     TGA_INTERNAL_ERR            = 255
 } TGAError;
 
@@ -77,10 +77,18 @@ uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_alpha_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_mono_at(TGAImage *image, uint16_t x, uint16_t y);
 
-uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red);
-uint8_t tga_set_green_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t green);
-uint8_t tga_set_blue_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t blue);
-uint8_t tga_set_alpha_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t alpha);
-uint8_t tga_set_mono_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t value);
+uint8_t tga_set_red_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t red);
+uint8_t tga_set_green_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t green);
+uint8_t tga_set_blue_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t blue);
+uint8_t tga_set_alpha_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t alpha);
+uint8_t tga_set_mono_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t value);
 
+uint8_t *tga_create_pixel_for_image(TGAImage* img,
+                                    uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void tga_free_pixel(uint8_t* pixel);
+
+uint8_t *tga_get_pixel_copy_at(TGAImage *img, uint16_t x, uint16_t y);
+uint8_t tga_set_pixel_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t *pixel);
+uint8_t tga_set_pixel_block(TGAImage *image, uint16_t x, uint16_t y,
+                            uint16_t width, uint16_t height, uint8_t *pixel);
 #endif/*__NY_TGA_FILE*/

@@ -7,6 +7,17 @@
 TGAError tga_err = TGA_NO_ERR;
 char tga_err_string[TGA_ERR_MAX] = {0};
 
+static int _coordinate_sanity(TGAImage *image, uint16_t x, uint16_t y)
+{
+    check(x < tga_get_width(image), TGA_ARG_ERR, "X coordinate is larger than"
+            " image width.");
+    check(y < tga_get_height(image), TGA_ARG_ERR, "Y coordinate is larger "
+            "than image height.");
+    return 1;
+error:
+    return 0;
+}
+
 static int _allocate_tga_data(TGAImage *image, uint8_t depth,
                               uint16_t width, uint16_t height)
 {
@@ -241,6 +252,7 @@ static uint8_t *_get_pixel_point_at(TGAImage *image, uint16_t x, uint16_t y)
 uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't get red channel on monochrome image.");
@@ -267,6 +279,7 @@ error:
 uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     uint8_t value = 0; /* For the 16-bit case */
     if(tga_is_monochrome(image))
@@ -295,6 +308,7 @@ error:
 uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't get blue channel on monochrome image.");
@@ -318,6 +332,7 @@ error:
 uint8_t tga_get_alpha_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't get alpha on monochrome image.");
@@ -341,6 +356,7 @@ error:
 uint8_t tga_get_mono_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(!tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Not a monochrome image.");
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
@@ -354,6 +370,7 @@ error:
 uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set red channel on monochrome image.");
 
@@ -382,6 +399,7 @@ uint8_t tga_set_green_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t green)
 {
 
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set green channel on monochrome image.");
 
@@ -411,6 +429,7 @@ error:
 uint8_t tga_set_blue_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t blue)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set blue channel on monochrome image.");
 
@@ -437,6 +456,7 @@ error:
 uint8_t tga_set_alpha_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t alpha)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set alpha channel on monochrome image.");
 
@@ -464,10 +484,143 @@ error:
 uint8_t tga_set_mono_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t mono)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(!tga_is_monochrome(image))
         fail(TGA_TYPE_ERR,"Can't set monochrome value on non-monochrome image");
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     *pixel = mono;
+    return 1;
+error:
+    return 0;
+}
+
+/* Primarily made for TrueColor images as a convenience function. Therefore, error for
+ * non-truecolor images. */
+uint8_t *tga_create_pixel_for_image(TGAImage *image,
+                                    uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    uint8_t depth = (uint8_t)((tga_get_pixel_depth(image) + 7) / 8);
+    uint8_t *pixel = malloc(sizeof(uint8_t) * depth);
+    memset(pixel, 0, sizeof(uint8_t)*depth);
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't create pixel for monochrome image. "
+                "Use monochrome functions.");
+    switch(depth)
+    {
+        case 2:
+            /* Will set them for: ABBBBBGG GGGRRRRR */
+            /* Normalize them for 5-bits each */
+            r &= 31;
+            g &= 31;
+            b &= 31;
+            if(a)
+                *pixel |= 128; /* PIXEL | 10000000 */
+            /* Red */
+            *(pixel+1) |= (r & 31); /* PIXEL | 00011111 */
+            /* Green */
+            *(pixel+1) |= ((g & 7) << 5); /* PIXEL | (GREEN & 00000111) SHIFT */
+            *pixel |= ((g & 24) >> 3); /* PIXEL | (GREEN * 00011000) SHIFT */
+            /* BLUE */
+            *pixel |= ((b << 2) & 170); /* PIXEL | ((SHIFT BLUE) & 01111100) */
+            return pixel;
+
+        case 3:
+            pixel[0] = b;
+            pixel[1] = g;
+            pixel[2] = r;
+        case 4:
+            pixel[0] = a;
+            pixel[1] = b;
+            pixel[2] = g;
+            pixel[3] = r;
+            return pixel;
+        default:
+            fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
+    }
+
+error:
+    if(pixel)
+        free(pixel);
+    return NULL;
+}
+
+void tga_free_pixel(uint8_t *pixel)
+{
+    if(pixel)
+        free(pixel);
+}
+
+uint8_t *tga_get_pixel_copy_at(TGAImage *image, uint16_t x, uint16_t y)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
+    uint8_t depth = (uint8_t)((tga_get_pixel_depth(image) + 7) / 8);
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    uint8_t *new_pixel = malloc(sizeof(uint8_t) * depth);
+    switch(depth)
+    {
+        case 1:
+            *new_pixel = *pixel;
+            return new_pixel;
+        case 2:
+            new_pixel[0] = pixel[0];
+            new_pixel[1] = pixel[1];
+            return new_pixel;
+        case 3:
+            new_pixel[0] = pixel[0];
+            new_pixel[1] = pixel[1];
+            new_pixel[2] = pixel[2];
+            return new_pixel;
+        case 4:
+            new_pixel[0] = pixel[0];
+            new_pixel[1] = pixel[1];
+            new_pixel[2] = pixel[2];
+            new_pixel[3] = pixel[3];
+            return new_pixel;
+        default:
+            fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
+    }
+error:
+    if(new_pixel)
+        free(new_pixel);
+    return NULL;
+}
+
+uint8_t tga_set_pixel_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t *pix)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
+    check(pix, TGA_ARG_ERR, "Pixel data is NULL.");
+
+    uint8_t depth = (uint8_t)((tga_get_pixel_depth(image) + 7) / 8);
+    uint64_t data_offset = (y * tga_get_width(image) * depth) + (x * depth);
+    for(int i = 0; i < depth; i++)
+    {
+        image->data[data_offset + i] = pix[i];
+    }
+    return 1;
+error:
+    return 0;
+}
+
+uint8_t tga_set_pixel_block(TGAImage *image, uint16_t x, uint16_t y,
+                            uint16_t width, uint16_t height, uint8_t *pixel)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
+    check(pixel, TGA_ARG_ERR, "Pixel data is NULL.");
+
+    uint8_t depth = (uint8_t)((tga_get_pixel_depth(image) + 7) / 8);
+    uint64_t data_offset = 0;
+    for(uint16_t line = y; line < height+y; line++)
+    {
+        data_offset = (line*tga_get_width(image)*depth) + (x*depth);
+        for(uint16_t loc = x; loc < width+x; loc++)
+        {
+            memcpy(image->data+data_offset+(loc*depth), pixel, depth);
+        }
+    }
     return 1;
 error:
     return 0;
