@@ -50,18 +50,18 @@ TGAImage *new_tga_image(TGAColorType ct, uint8_t depth,
         if(!_allocate_tga_data(image, depth, width, height))
             goto error; /* allocate will have set err already. */
 
+    image->_meta->image_type = ct;
     image->_meta->extension_offset = 0;
     image->_meta->developer_offset = 0;
     image->_meta->c_map_length = 0;
     image->_meta->x_offset = 0;
     image->_meta->y_offset = 0;
-    image->_meta->width = 0;
-    image->_meta->height = 0;
+    image->_meta->width = width;
+    image->_meta->height = height;
     image->_meta->c_map_start = 0;
     image->_meta->id_length = 0;
     image->_meta->c_map_type = 0;
-    image->_meta->image_type = 0;
-    image->_meta->pixel_depth = 0;
+    image->_meta->pixel_depth = depth;
     image->_meta->c_map_depth = 0;
     image->_meta->image_descriptor = 0;
     memset(image->_meta->__padding, '\0', sizeof(image->_meta->__padding));
