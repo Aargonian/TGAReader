@@ -239,15 +239,14 @@ static int _read_unencoded_tga_image_data(TGAImage *image, FILE *file)
     int32_t offset = (uint32_t)TGA_HEADER_SIZE + image->_meta->id_length +
             (image->_meta->c_map_length * (image->_meta->c_map_depth/8)) +
             image->_meta->c_map_start;
-    if(ftell(file) != offset)
-        check(fseek(file, offset, SEEK_SET) == 0, TGA_GEN_IO_ERR,
-                "Unable to seek to data offset.");
+    check(fseek(file, offset, SEEK_SET) == 0, TGA_GEN_IO_ERR,
+            "Unable to seek to data offset.");
 
     uint8_t depth_mult = (uint8_t)((image->_meta->pixel_depth+7) / 8);
-    uint32_t total = image->_meta->width * image->_meta->height * depth_mult;
-    image->data = malloc(sizeof(uint8_t) * total);
+    uint32_t pixels = image->_meta->width * image->_meta->height;
+    image->data = malloc(sizeof(uint8_t) * pixels * depth_mult);
     check(image->data, TGA_MEM_ERR, "Unable to allocate image data.");
-    check(fread(image->data, total, 1, file) == 1, TGA_READ_ERR,
+    check(fread(image->data, pixels * depth_mult, 1, file) == 1, TGA_READ_ERR,
             "Unable to read image pixel data.");
 
     return 1;
