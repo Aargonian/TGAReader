@@ -236,7 +236,7 @@ static int _read_unencoded_tga_image_data(TGAImage *image, FILE *file)
     if(image->data)
         free(image->data);
     check(file, TGA_INV_FILE_PNT, "Invalid File Pointer passed.");
-    uint32_t offset = (uint32_t)TGA_HEADER_SIZE + image->_meta->id_length +
+    int32_t offset = (uint32_t)TGA_HEADER_SIZE + image->_meta->id_length +
             (image->_meta->c_map_length * (image->_meta->c_map_depth/8)) +
             image->_meta->c_map_start;
     if(ftell(file) != offset)
