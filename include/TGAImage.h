@@ -16,6 +16,7 @@ typedef enum {
     TGA_INV_FILE_NAME           = 8,
     TGA_IMAGE_IMMUTABLE_ERR     = 9,
     TGA_UNSUPPORTED             = 10,
+    TGA_TYPE_ERR                = 11,
     TGA_INTERNAL_ERR            = 255
 } TGAError;
 
@@ -65,6 +66,7 @@ uint16_t tga_get_height(TGAImage *image);
 uint8_t tga_get_pixel_depth(TGAImage *image);
 void tga_get_origin_coordinates(TGAImage * image, int *x, int *y);
 uint8_t tga_get_attribute_bits(TGAImage *image);
+uint8_t tga_is_monochrome(TGAImage *image);
 
 uint32_t tga_get_extension_offset(TGAImage *image);
 uint32_t tga_get_developer_offset(TGAImage *image);
@@ -72,9 +74,13 @@ uint32_t tga_get_developer_offset(TGAImage *image);
 uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y);
 uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y);
+uint8_t tga_get_alpha_at(TGAImage *image, uint16_t x, uint16_t y);
+uint8_t tga_get_mono_at(TGAImage *image, uint16_t x, uint16_t y);
 
-uint8_t tga_set_red_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t red);
-uint8_t tga_set_green_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t green);
-uint8_t tga_set_blue_at(TGAImage *img, uint16_t x, uint16_t y, uint8_t blue);
+uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red);
+uint8_t tga_set_green_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t green);
+uint8_t tga_set_blue_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t blue);
+uint8_t tga_set_alpha_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t alpha);
+uint8_t tga_set_mono_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t value);
 
 #endif/*__NY_TGA_FILE*/

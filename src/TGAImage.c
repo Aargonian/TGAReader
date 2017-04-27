@@ -220,11 +220,20 @@ error:
     return 0;
 }
 
+uint8_t tga_is_monochrome(TGAImage *image)
+{
+    if((tga_get_image_type(image) == TGA_MONOCHROME ||
+            tga_get_image_type(image) == TGA_ENCODED_MONOCHROME ) &&
+            tga_get_pixel_depth(image) == 8)
+        return 1;
+    return 0;
+}
+
 /* TODO: Implement for all pixel depths and TGA Types */
 /* IMPLEMENTED: TGA_TRUECOLOR, TGA_MONOCHROME */
 static uint8_t *_get_pixel_point_at(TGAImage *image, uint16_t x, uint16_t y)
 {
-    uint8_t depth = (uint8_t)(tga_get_pixel_depth(image)+7)/8;
+    uint8_t depth = (uint8_t)((tga_get_pixel_depth(image)+7)/8);
     uint32_t row_width = tga_get_width(image)*depth;
     return image->data + (y * row_width) + (x * depth);
 }
@@ -232,18 +241,18 @@ static uint8_t *_get_pixel_point_at(TGAImage *image, uint16_t x, uint16_t y)
 uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
-    /*check(tga_get_image_type(image) != TGA_MONOCHROME &&
-            tga_get_image_type(image) != TGA_ENCODED_MONOCHROME,
-            TGA_IMAGE_TYPE_ERR,
-            "Attempted to get red channel on Monochrome image.");*/
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
-
-    uint8_t calc_depth =
-            tga_get_pixel_depth(image)-tga_get_attribute_bits(image);
-    switch(calc_depth)
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't get red channel on monochrome image.");
+    switch(tga_get_pixel_depth(image))
     {
         case 8:
             return pixel[0];
+        case 16:
+            /* For 16-bit we'll assume the image was stored thusly:
+             * ABBBBBGG GGGRRRRR */
+            pixel++;
+            return (*pixel) & (uint8_t)31; /* VALUE & 00011111 */
         case 24:
             return pixel[2];
         case 32:
@@ -259,10 +268,19 @@ uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    uint8_t value = 0; /* For the 16-bit case */
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't get green channel on monochrome image.");
     switch(tga_get_pixel_depth(image))
     {
         case 8:
             return pixel[0];
+        case 16:
+            /* For 16-bit we'll assume the image was stored thusly:
+             * ABBBBBGG GGGRRRRR */
+            value += ((*pixel++) & (uint8_t)3) << 3; /* pixel & 00000011 */
+            value += ((*pixel) & (uint8_t)(224)) >> 5; /* pixel & 11100000 */
+            return value;
         case 24:
             return pixel[1];
         case 32:
@@ -278,12 +296,38 @@ uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't get blue channel on monochrome image.");
     switch(tga_get_pixel_depth(image))
     {
-        case 8:
-            return pixel[0];
+        case 16:
+            /* For 16-bit we'll assume the image was stored thusly:
+             * ABBBBBGG GGGRRRRR */
+            return ((*pixel) & (uint8_t)124) >> 2; /* VALUE & 01111100 */
         case 24:
             return pixel[0];
+        case 32:
+            return pixel[1];
+        default:
+            fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
+    }
+error:
+    return 0;
+}
+
+uint8_t tga_get_alpha_at(TGAImage *image, uint16_t x, uint16_t y)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't get alpha on monochrome image.");
+    switch(tga_get_pixel_depth(image))
+    {
+        case 16:
+            /* Assuming ABBBBBGGGGGRRRRR */
+            return ((*pixel)&(uint8_t)128) >> 7;
+        case 24:
+            return 0;
         case 32:
             return pixel[0];
         default:
@@ -293,12 +337,32 @@ error:
     return 0;
 }
 
-/* TODO: THIS IS NOT FINISHED! */
+/* TODO: Implement support for ColorMapped images. */
+uint8_t tga_get_mono_at(TGAImage *image, uint16_t x, uint16_t y)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    if(!tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Not a monochrome image.");
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    return *pixel;
+    return 1;
+error:
+    return 0;
+}
+
+/* TODO: Implement support for ColorMapped images. */
 uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red)
 {
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't set red channel on monochrome image.");
+
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     switch(tga_get_pixel_depth(image))
     {
+        case 16:
+            pixel[1] |= (red & 31); // GGGRRRRR | (VALUE & 00011111)
+            break;
         case 24:
             pixel[2] = red;
             break;
@@ -306,8 +370,104 @@ uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red)
             pixel[3] = red;
             break;
         default:
-            fail(TGA_UNSUPPORTED, "Not Supported Depth Yet.");
+            fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
     }
+    return 1;
+error:
+    return 0;
+}
+
+/* TODO: Implement support for ColorMapped images. */
+uint8_t tga_set_green_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t green)
+{
+
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't set green channel on monochrome image.");
+
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    switch(tga_get_pixel_depth(image))
+    {
+        case 16:
+            /* ABBBBBGG GGGRRRRR */
+            pixel[0] |= ((green & 24) >> 3); /* ABBBBBGG | (GREEN & 00011000) */
+            pixel[1] |= ((green & 7) << 5);  /* GGGRRRRR | (GREEN & 00000111) */
+            break;
+        case 24:
+            pixel[1] = green;
+            break;
+        case 32:
+            pixel[2] = green;
+            break;
+        default:
+            fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
+    }
+    return 1;
+error:
+    return 0;
+}
+
+/* TODO: Implement support for ColorMapped images. */
+uint8_t tga_set_blue_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t blue)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't set blue channel on monochrome image.");
+
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    switch(tga_get_pixel_depth(image))
+    {
+        case 16:
+            /* ABBBBBGG GGGRRRRR */
+            pixel[0] |= ((blue & 31) << 2);
+        case 24:
+            pixel[0] = blue;
+        case 32:
+            pixel[1] = blue;
+        default:
+            fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
+    }
+
+    return 1;
+error:
+    return 0;
+}
+
+/* TODO: Implement support for ColorMapped images. */
+uint8_t tga_set_alpha_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t alpha)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    if(tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR, "Can't set alpha channel on monochrome image.");
+
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    switch(tga_get_pixel_depth(image))
+    {
+        case 16:
+            /* ABBBBBGG GGGRRRRR */
+            if(alpha)
+                pixel[0] |= 128; /* PIXEL | 10000000 */
+            else
+                pixel[0] &= 127; /* PIXEL & 01111111 */
+        case 32:
+            pixel[0] = alpha;
+        default:
+            fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
+    }
+
+    return 1;
+error:
+    return 0;
+}
+
+/* TODO: Implement support for ColorMapped images. */
+uint8_t tga_set_mono_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t mono)
+{
+    check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    if(!tga_is_monochrome(image))
+        fail(TGA_TYPE_ERR,"Can't set monochrome value on non-monochrome image");
+    uint8_t *pixel = _get_pixel_point_at(image, x, y);
+    *pixel = mono;
     return 1;
 error:
     return 0;
