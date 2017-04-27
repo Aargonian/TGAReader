@@ -48,15 +48,26 @@ static void print_tga_data(TGAImage *img)
 
 int main(int argc, char **argv)
 {
-    if(argc != 3)
+    if(argc != 2)
         return 1;
 
-    FILE *img_file = fopen(argv[1], "rb");
-    if(!img_file)
+    printf("MAKING IMAGE\n");
+    TGAImage *img = new_tga_image(TGA_TRUECOLOR, 32, 128, 128);
+    if(!img) {
+        printf("TGA ERROR: %s", tga_error_str());
         return tga_error();
-    TGAImage *img = read_tga_image(img_file);
-    if(!img)
-        return tga_error();
+    }
+    printf("ENDING HERE.\n");
+    uint8_t *red = tga_create_pixel_for_image(img, 255, 0, 0, 255);
+    uint8_t *green = tga_create_pixel_for_image(img, 0, 255, 0, 255);
+    uint8_t *blue = tga_create_pixel_for_image(img, 0, 0, 255, 255);
+    uint8_t *white = tga_create_pixel_for_image(img, 255, 255, 255, 255);
+    printf("MADE IT HERE.\n");
+    tga_set_pixel_block(img, 0, 0, 64, 64, red);
+    tga_set_pixel_block(img, 64, 0, 64, 64, green);
+    tga_set_pixel_block(img, 0, 64, 64, 64, blue);
+    tga_set_pixel_block(img, 64, 64, 64, 64, white);
+    printf("BLOCKS DONE.\n");
     for(int i = 0; i < 8; i++)
     {
         for(int j = 0; j < 8; j++)
@@ -65,8 +76,9 @@ int main(int argc, char **argv)
         }
     }
     print_tga_data(img);
-    write_tga_image(img, argv[2]);
+    printf("FILE TO WRITE: %s\n", argv[1]);
+    write_tga_image(img, argv[1]);
+    printf("IMAGE TYPE TO WRITE: %d\n", tga_get_image_type(img));
     free_tga_image(img);
-    fclose(img_file);
     return 0;
 }
