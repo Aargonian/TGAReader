@@ -612,13 +612,13 @@ uint8_t tga_set_pixel_block(TGAImage *image, uint16_t x, uint16_t y,
     check(pixel, TGA_ARG_ERR, "Pixel data is NULL.");
 
     uint8_t depth = (uint8_t)((tga_get_pixel_depth(image) + 7) / 8);
-    uint64_t data_offset = 0;
+    uint64_t line_offset = 0;
     for(uint16_t line = y; line < height+y; line++)
     {
-        data_offset = (line*tga_get_width(image)*depth) + (x*depth);
+        line_offset = (line*tga_get_width(image)*depth);
         for(uint16_t loc = x; loc < width+x; loc++)
         {
-            memcpy(image->data+data_offset+(loc*depth), pixel, depth);
+            memcpy(image->data + line_offset + (loc * depth), pixel, depth);
         }
     }
     return 1;
