@@ -10,9 +10,9 @@ char tga_err_string[TGA_ERR_MAX] = {0};
 static int _coordinate_sanity(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(x < tga_get_width(image), TGA_ARG_ERR, "X coordinate is larger than"
-            " image width.");
+            " image width. X: %d, WIDTH: %d", x, tga_get_width(image));
     check(y < tga_get_height(image), TGA_ARG_ERR, "Y coordinate is larger "
-            "than image height.");
+            "than image height. X: %d, WIDTH: %d", x, tga_get_height(image));
     return 1;
 error:
     return 0;
@@ -25,6 +25,7 @@ static int _allocate_tga_data(TGAImage *image, uint8_t depth,
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGA Image.");
     image->data = malloc(bytes * sizeof(uint8_t) * width * height);
     check(image->data, TGA_MEM_ERR, "Out of memory.");
+    memset(image->data, 0, bytes * sizeof(uint8_t) * width * height);
     return 1;
 
 error:
@@ -64,6 +65,11 @@ TGAImage *new_tga_image(TGAColorType ct, uint8_t depth,
     image->_meta->pixel_depth = depth;
     image->_meta->c_map_depth = 0;
     image->_meta->image_descriptor = 0;
+
+    /*if(depth == 16 || depth == 32)
+    {
+        image->_meta->image_descriptor |= (depth == 16) ? 1 : 15;
+    }*/
     memset(image->_meta->__padding, '\0', sizeof(image->_meta->__padding));
 
     return image;
@@ -258,13 +264,9 @@ uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y)
         fail(TGA_TYPE_ERR, "Can't get red channel on monochrome image.");
     switch(tga_get_pixel_depth(image))
     {
-        case 8:
-            return pixel[0];
         case 16:
-            /* For 16-bit we'll assume the image was stored thusly:
-             * ABBBBBGG GGGRRRRR */
-            pixel++;
-            return (*pixel) & (uint8_t)31; /* VALUE & 00011111 */
+            /* GGGBBBBB ARRRRRGG*/
+	    return ((pixel[1] & 124) >> 2); /* ARRRRRGG & 01111100 */
         case 24:
             return pixel[2];
         case 32:
@@ -286,13 +288,10 @@ uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y)
         fail(TGA_TYPE_ERR, "Can't get green channel on monochrome image.");
     switch(tga_get_pixel_depth(image))
     {
-        case 8:
-            return pixel[0];
         case 16:
-            /* For 16-bit we'll assume the image was stored thusly:
-             * ABBBBBGG GGGRRRRR */
-            value += ((*pixel++) & (uint8_t)3) << 3; /* pixel & 00000011 */
-            value += ((*pixel) & (uint8_t)(224)) >> 5; /* pixel & 11100000 */
+            /* GGGBBBBB ARRRRRGG*/
+	    value += ((pixel[0] & 224) >> 5); /* GGGBBBBB & 11100000 */
+	    value += ((pixel[1] & 3) << 3); /* ARRRRRGG & 00000011 */
             return value;
         case 24:
             return pixel[1];
@@ -315,9 +314,8 @@ uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y)
     switch(tga_get_pixel_depth(image))
     {
         case 16:
-            /* For 16-bit we'll assume the image was stored thusly:
-             * ABBBBBGG GGGRRRRR */
-            return ((*pixel) & (uint8_t)124) >> 2; /* VALUE & 01111100 */
+            /* GGGBBBBB ARRRRRGG*/
+	    return pixel[0] & 31; /* GGGBBBBB & 00011111 */
         case 24:
             return pixel[0];
         case 32:
@@ -339,12 +337,12 @@ uint8_t tga_get_alpha_at(TGAImage *image, uint16_t x, uint16_t y)
     switch(tga_get_pixel_depth(image))
     {
         case 16:
-            /* Assuming ABBBBBGGGGGRRRRR */
-            return ((*pixel)&(uint8_t)128) >> 7;
+            /* GGGBBBBB ARRRRRGG*/
+	    return (pixel[1] & 128) > 0; /* ARRRRRGG & 10000000 */
         case 24:
             return 0;
         case 32:
-            return pixel[0];
+            return pixel[3];
         default:
             fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
     }
@@ -378,13 +376,16 @@ uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red)
     switch(tga_get_pixel_depth(image))
     {
         case 16:
-            pixel[1] |= (red & 31); // GGGRRRRR | (VALUE & 00011111)
+            /* GGGBBBBB ARRRRRGG*/
+	    red = red > 31 ? 31 : red; /* Clamp to 0-31 Range for 5-bit. */
+	    pixel[1] &= 131; /* ARRRRRGG & 10000011 | Set to 0 */
+            pixel[1] |= (red << 2); /* GGGRRRRR | (VALUE & 01111100) */
             break;
         case 24:
             pixel[2] = red;
             break;
         case 32:
-            pixel[3] = red;
+            pixel[2] = red;
             break;
         default:
             fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
@@ -407,15 +408,18 @@ uint8_t tga_set_green_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t green)
     switch(tga_get_pixel_depth(image))
     {
         case 16:
-            /* ABBBBBGG GGGRRRRR */
-            pixel[0] |= ((green & 24) >> 3); /* ABBBBBGG | (GREEN & 00011000) */
-            pixel[1] |= ((green & 7) << 5);  /* GGGRRRRR | (GREEN & 00000111) */
+            /* GGGBBBBB ARRRRRGG*/
+	    green = green > 31 ? 31 : green; /* Clamp to 0-31 Range for 5-bit */
+	    pixel[0] &= 31; /* GGGBBBBB & 00011111 | Set to 0 */
+	    pixel[1] &= 252; /* ARRRRRGG & 11111100 | Set to 0 */
+            pixel[0] |= ((green & 7) << 5); /* GREEN & 00000111 */
+            pixel[1] |= ((green & 24) >> 3); /* GREEN & 00011000 */
             break;
         case 24:
             pixel[1] = green;
             break;
         case 32:
-            pixel[2] = green;
+            pixel[1] = green;
             break;
         default:
             fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
@@ -437,12 +441,17 @@ uint8_t tga_set_blue_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t blue)
     switch(tga_get_pixel_depth(image))
     {
         case 16:
-            /* ABBBBBGG GGGRRRRR */
-            pixel[0] |= ((blue & 31) << 2);
+            /* GGGBBBBB ARRRRRGG*/
+            blue = blue > 31 ? 31 : blue;
+	    pixel[0] &= 224; /* GGGBBBBB & 11100000 | Set to 0 */
+            pixel[0] |= blue;
+	    break;
         case 24:
             pixel[0] = blue;
+	    break;
         case 32:
-            pixel[1] = blue;
+            pixel[0] = blue;
+	    break;
         default:
             fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
     }
@@ -464,13 +473,15 @@ uint8_t tga_set_alpha_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t alpha)
     switch(tga_get_pixel_depth(image))
     {
         case 16:
-            /* ABBBBBGG GGGRRRRR */
+            /* GGGBBBBB ARRRRRGG*/
             if(alpha)
-                pixel[0] |= 128; /* PIXEL | 10000000 */
+                pixel[1] |= 128; /* PIXEL | 10000000 */
             else
-                pixel[0] &= 127; /* PIXEL & 01111111 */
+                pixel[1] &= 127; /* PIXEL & 01111111 */
+	    break;
         case 32:
-            pixel[0] = alpha;
+            pixel[3] = alpha;
+	    break;
         default:
             fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");
     }
@@ -494,8 +505,10 @@ error:
     return 0;
 }
 
-/* Primarily made for TrueColor images as a convenience function. Therefore, error for
- * non-truecolor images. */
+/* 
+ * Primarily made for TrueColor images as a convenience function. Therefore, 
+ * error for non-truecolor images. 
+ */
 uint8_t *tga_create_pixel_for_image(TGAImage *image,
                                     uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
@@ -506,34 +519,40 @@ uint8_t *tga_create_pixel_for_image(TGAImage *image,
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't create pixel for monochrome image. "
                 "Use monochrome functions.");
+
     switch(depth)
     {
         case 2:
-            /* Will set them for: ABBBBBGG GGGRRRRR */
-            /* Normalize them for 5-bits each */
-            r &= 31;
-            g &= 31;
-            b &= 31;
-            if(a)
-                *pixel |= 128; /* PIXEL | 10000000 */
-            /* Red */
-            *(pixel+1) |= (r & 31); /* PIXEL | 00011111 */
-            /* Green */
-            *(pixel+1) |= ((g & 7) << 5); /* PIXEL | (GREEN & 00000111) SHIFT */
-            *pixel |= ((g & 24) >> 3); /* PIXEL | (GREEN * 00011000) SHIFT */
-            /* BLUE */
-            *pixel |= ((b << 2) & 170); /* PIXEL | ((SHIFT BLUE) & 01111100) */
+            /* Will set them for: GGGBBBBB ARRRRRGG */
+            /* Normalize them for 5-bits each. Guaranteed to be form: 000XXXXX*/
+	    r = r > 31 ? 31 : r;
+	    g = g > 31 ? 31 : g;
+	    b = b > 31 ? 31 : b;
+
+	    if(a)
+		pixel[1] |= 128;
+
+	    /* RED */
+	    pixel[1] |= r << 2;
+
+	    /* GREEN */
+	    pixel[0] |= ((g & 7) << 5);
+	    pixel[1] |= ((g & 24) >> 3);
+
+	    /* BLUE */
+	    pixel[0] |= b;
             return pixel;
 
         case 3:
             pixel[0] = b;
             pixel[1] = g;
             pixel[2] = r;
+	    return pixel;
         case 4:
-            pixel[0] = a;
-            pixel[1] = b;
-            pixel[2] = g;
-            pixel[3] = r;
+            pixel[0] = b;
+            pixel[1] = g;
+            pixel[2] = r;
+            pixel[3] = a;
             return pixel;
         default:
             fail(TGA_UNSUPPORTED, "Unsupported pixel depth.");

@@ -51,34 +51,33 @@ int main(int argc, char **argv)
     if(argc != 2)
         return 1;
 
-    printf("MAKING IMAGE\n");
-    TGAImage *img = new_tga_image(TGA_TRUECOLOR, 32, 128, 128);
+    TGAImage *img = new_tga_image(TGA_TRUECOLOR, 32, 128, 255);
     if(!img) {
         printf("TGA ERROR: %s", tga_error_str());
         return tga_error();
     }
-    printf("ENDING HERE.\n");
     uint8_t *red = tga_create_pixel_for_image(img, 255, 0, 0, 255);
     uint8_t *green = tga_create_pixel_for_image(img, 0, 255, 0, 255);
     uint8_t *blue = tga_create_pixel_for_image(img, 0, 0, 255, 255);
     uint8_t *white = tga_create_pixel_for_image(img, 255, 255, 255, 255);
-    printf("MADE IT HERE.\n");
-    tga_set_pixel_block(img, 0, 0, 64, 64, red);
-    tga_set_pixel_block(img, 64, 0, 64, 64, green);
-    tga_set_pixel_block(img, 0, 64, 64, 64, blue);
-    tga_set_pixel_block(img, 64, 64, 64, 64, white);
-    printf("BLOCKS DONE.\n");
-    for(int i = 0; i < 8; i++)
+    /*tga_set_pixel_block(img, 0, 0, 32, 128, red);
+    tga_set_pixel_block(img, 32, 0, 32, 128, green);
+    tga_set_pixel_block(img, 64, 0, 32, 128, blue);
+    tga_set_pixel_block(img, 96, 0, 32, 128, white);*/
+    /*uint8_t *blue = tga_create_pixel_for_image(img, 255, 0, 0, 255);
+    tga_set_pixel_block(img, 0, 0, 128, 128, blue);*/
+    //print_tga_data(img);
+    for(int x = 0; x < tga_get_width(img); x++)
     {
-        for(int j = 0; j < 8; j++)
-        {
-            tga_set_red_at(img, i, j, 255);
-        }
+	    for(int y = 0; y < tga_get_height(img); y++)
+	    {
+		    tga_set_alpha_at(img, x, y, 255);
+		    tga_set_red_at(img, x, y, y);
+		    tga_set_green_at(img, x, y, y);
+		    tga_set_blue_at(img, x, y, y < 255 ? y : 255);
+	    } 
     }
-    print_tga_data(img);
-    printf("FILE TO WRITE: %s\n", argv[1]);
     write_tga_image(img, argv[1]);
-    printf("IMAGE TYPE TO WRITE: %d\n", tga_get_image_type(img));
     free_tga_image(img);
     return 0;
 }
