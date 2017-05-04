@@ -5,11 +5,35 @@ TGA images.
 
 This library falls under the MIT license.
 
-**Note:** This library is currently a work-in-progres and doesn't support color-mapped or encoded
-TGA files. It also does not (yet) support writing files to disk. If you wish to contribute, any
-interest is appreciated. Eventually I would like to have some convenience functions for loading the
-TGA images into other libraries (e.g. loading into a pixbuf for gdk/gtk+), but that is sometime off
-in the future.
+## Currently Supported Features
+
+### Reading
+
+* Truecolor
+* Truecolor RLE
+* Monochrome
+* Monochrome RLE
+* ColorMapped
+* ColorMapped RLE
+
+
+### Writing
+
+* Truecolor
+* Monochrome
+
+### Modify
+
+* Truecolor
+* Truecolor RLE
+* Monochrome
+* Monochrome RLE
+
+### Other Notes
+
+As noted below in "Known Standard Breaks", the project currently does not support arbitrary-length bit-depths. 
+
+The project also currently does not actually read any of the version 2.0 specific TGA Information, except to verify that the footer is consistent with the Version 2.0 Spec. Reading a 2.0 image will currently work with no known issues, but the ability to modify or actually read the developer or extension fields does not work. Likewise, write support for these fields has not been implemented.
 
 ## Building
 
@@ -22,3 +46,7 @@ cmake ..
 ```
 
 From there, either run the makefile or open the Visual Studio Solution to build.
+
+## Known Standard Breaks
+
+Currently, the TGAReader library does not support arbitrary bit-depth images. The implementation currently supports 8-, 16-, 24-, and 32-bit TGAImages. There are currently no plans to support arbitrary bit-depth.
