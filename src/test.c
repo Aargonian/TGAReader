@@ -53,20 +53,8 @@ int main(int argc, char **argv)
 
     TGAImage *img = new_tga_image(TGA_TRUECOLOR, 32, 128, 255);
     if(!img) {
-        printf("TGA ERROR: %s", tga_error_str());
         return tga_error();
     }
-    uint8_t *red = tga_create_pixel_for_image(img, 255, 0, 0, 255);
-    uint8_t *green = tga_create_pixel_for_image(img, 0, 255, 0, 255);
-    uint8_t *blue = tga_create_pixel_for_image(img, 0, 0, 255, 255);
-    uint8_t *white = tga_create_pixel_for_image(img, 255, 255, 255, 255);
-    /*tga_set_pixel_block(img, 0, 0, 32, 128, red);
-    tga_set_pixel_block(img, 32, 0, 32, 128, green);
-    tga_set_pixel_block(img, 64, 0, 32, 128, blue);
-    tga_set_pixel_block(img, 96, 0, 32, 128, white);*/
-    /*uint8_t *blue = tga_create_pixel_for_image(img, 255, 0, 0, 255);
-    tga_set_pixel_block(img, 0, 0, 128, 128, blue);*/
-    //print_tga_data(img);
     for(int x = 0; x < tga_get_width(img); x++)
     {
 	    for(int y = 0; y < tga_get_height(img); y++)

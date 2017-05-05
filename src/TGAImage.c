@@ -18,6 +18,22 @@ error:
     return 0;
 }
 
+static void _normalize_coordinates(TGAImage *image, uint16_t *x, uint16_t *y)
+{
+	int x_orig = 0, y_orig = 0;
+	tga_get_origin_coordinates(image, &x_orig, &y_orig);
+	if(x_orig == 1)
+	{
+	    *x = tga_get_width(image) - *x;
+	    *x -= 1;
+	}
+	if(y_orig == 0)
+	{
+	    *y = tga_get_height(image) - *y;
+	    *y -= 1;
+	}
+}
+
 static int _allocate_tga_data(TGAImage *image, uint8_t depth,
                               uint16_t width, uint16_t height)
 {
@@ -258,6 +274,7 @@ static uint8_t *_get_pixel_point_at(TGAImage *image, uint16_t x, uint16_t y)
 uint8_t tga_get_red_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     if(tga_is_monochrome(image))
@@ -281,6 +298,7 @@ error:
 uint8_t tga_get_green_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     uint8_t value = 0; /* For the 16-bit case */
@@ -307,6 +325,7 @@ error:
 uint8_t tga_get_blue_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     if(tga_is_monochrome(image))
@@ -330,6 +349,7 @@ error:
 uint8_t tga_get_alpha_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
     if(tga_is_monochrome(image))
@@ -354,6 +374,7 @@ error:
 uint8_t tga_get_mono_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(!tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Not a monochrome image.");
@@ -368,6 +389,7 @@ error:
 uint8_t tga_set_red_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t red)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set red channel on monochrome image.");
@@ -400,6 +422,7 @@ uint8_t tga_set_green_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t green)
 {
 
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set green channel on monochrome image.");
@@ -433,6 +456,7 @@ error:
 uint8_t tga_set_blue_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t blue)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set blue channel on monochrome image.");
@@ -465,6 +489,7 @@ error:
 uint8_t tga_set_alpha_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t alpha)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(tga_is_monochrome(image))
         fail(TGA_TYPE_ERR, "Can't set alpha channel on monochrome image.");
@@ -495,6 +520,7 @@ error:
 uint8_t tga_set_mono_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t mono)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Passed.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     if(!tga_is_monochrome(image))
         fail(TGA_TYPE_ERR,"Can't set monochrome value on non-monochrome image");
@@ -573,6 +599,7 @@ void tga_free_pixel(uint8_t *pixel)
 uint8_t *tga_get_pixel_copy_at(TGAImage *image, uint16_t x, uint16_t y)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     uint8_t depth = (uint8_t)((tga_get_pixel_depth(image) + 7) / 8);
     uint8_t *pixel = _get_pixel_point_at(image, x, y);
@@ -609,6 +636,7 @@ error:
 uint8_t tga_set_pixel_at(TGAImage *image, uint16_t x, uint16_t y, uint8_t *pix)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     check(pix, TGA_ARG_ERR, "Pixel data is NULL.");
 
@@ -627,6 +655,7 @@ uint8_t tga_set_pixel_block(TGAImage *image, uint16_t x, uint16_t y,
                             uint16_t width, uint16_t height, uint8_t *pixel)
 {
     check(_tga_sanity(image), TGA_INV_IMAGE_PNT, "Invalid TGAImage Pointer.");
+    _normalize_coordinates(image, &x, &y);
     check(_coordinate_sanity(image, x, y), tga_error(), tga_error_str());
     check(pixel, TGA_ARG_ERR, "Pixel data is NULL.");
 
