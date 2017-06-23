@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 		    tga_set_alpha_at(img, x, y, 255);
 		    tga_set_red_at(img, x, y, y);
 		    tga_set_green_at(img, x, y, y);
-		    tga_set_blue_at(img, x, y, y < 255 ? y : 255);
+		    tga_set_blue_at(img, x, y, y);
 	    } 
     }
     write_tga_image(img, argv[1]);
