@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include <TGAImage.h>
+#include <malloc.h>
 
 static void print_tga_data(TGAImage *img)
 {
@@ -32,8 +33,8 @@ static void print_tga_data(TGAImage *img)
     printf("Origin Point: %d,%d\n", x, y);
 
     uint8_t *pixel = NULL;
-    uint8_t depth = (tga_get_pixel_depth(img)+7) / 8;
-    uint8_t width = tga_get_width(img);
+    uint8_t depth = (uint8_t)((tga_get_pixel_depth(img) + 7) / 8);
+    uint16_t width = tga_get_width(img);
     printf("FIRST 8 x 8 Pixel Values (Assuming 24-bit Pixels):\n"); 
     for(y = 0; y < 8; y++)
     {
@@ -48,8 +49,13 @@ static void print_tga_data(TGAImage *img)
 
 int main(int argc, char **argv)
 {
-    if(argc != 2)
+    static char *default_file = "TEST_TGA.TGA";
+    if(argc < 2) {
+        printf("No default file specified. Using default file: %s\n", default_file);
+    } else if(argc > 2) {
+        printf("Usage: TGAReader <optional file>\n");
         return 1;
+    }
 
     TGAImage *img = new_tga_image(TGA_TRUECOLOR, 32, 128, 255);
     if(!img) {
@@ -65,7 +71,9 @@ int main(int argc, char **argv)
 		    tga_set_blue_at(img, x, y, y);
 	    } 
     }
-    write_tga_image(img, argv[1]);
+
+    char *file_path = argc == 2 ? argv[1] : default_file;
+    write_tga_image(img, file_path);
     free_tga_image(img);
     return 0;
 }
