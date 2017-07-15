@@ -16,6 +16,7 @@ This library falls under the MIT license.
 * ColorMapped
 * ColorMapped RLE
 
+*Note:* Reading support is currently incomplete for Version 2.0
 
 ### Writing
 
@@ -33,7 +34,7 @@ This library falls under the MIT license.
 
 As noted below in "Known Standard Breaks", the project currently does not support arbitrary-length bit-depths. 
 
-The project also currently does not actually read any of the version 2.0 specific TGA Information, except to verify that the footer is consistent with the Version 2.0 Spec. Reading a 2.0 image will currently work with no known issues, but the ability to modify or actually read the developer or extension fields does not work. Likewise, write support for these fields has not been implemented.
+The project currently does not actually read any of the version 2.0 specific TGA Information, except to verify that the footer is consistent with the Version 2.0 Spec. Reading a 2.0 image will currently work with no known issues, but the ability to modify or actually read the developer or extension fields does not work. Likewise, write support for these fields has not been implemented.
 
 ## Building
 
