@@ -38,6 +38,7 @@ extern char tga_err_string[TGA_ERR_MAX];
     #define do_print_err(...)
 #endif/*_TGA_DEBUG*/
 
+/* Do-while loop is necessary to avoid problems when embedded in an if/else */
 #define check(A, _NY_ERR, ...)                                  \
     do {                                                        \
         if(!(A)) {                                              \
