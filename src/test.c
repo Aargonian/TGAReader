@@ -2,6 +2,7 @@
 
 #include <TGAImage.h>
 #include <malloc.h>
+#include <math.h>
 
 static void print_tga_data(TGAImage *img)
 {
@@ -59,17 +60,18 @@ int main(int argc, char **argv)
 
     TGAImage *img = new_tga_image(TGA_TRUECOLOR, 32, 128, 255);
     if(!img) {
+        printf("An error occurred: %s\n", tga_error_str());
         return tga_error();
     }
     for(int x = 0; x < tga_get_width(img); x++)
     {
-	    for(int y = 0; y < tga_get_height(img); y++)
-	    {
-		    tga_set_alpha_at(img, x, y, 255);
-		    tga_set_red_at(img, x, y, y);
-		    tga_set_green_at(img, x, y, y);
-		    tga_set_blue_at(img, x, y, y);
-	    } 
+        for(int y = 0; y < tga_get_height(img); y++)
+        {
+            tga_set_alpha_at(img, x, y, 255);
+            tga_set_red_at(img, x, y, (y * x) % 255);
+            tga_set_green_at(img, x, y, y);
+            tga_set_blue_at(img, x, y, x);
+        }
     }
 
     char *file_path = argc == 2 ? argv[1] : default_file;

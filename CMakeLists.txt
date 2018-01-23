@@ -27,3 +27,4 @@ ENDIF (CMAKE_COMPILER_IS_GNUCC)
 add_executable(TGAReader ${SOURCE_FILES})
 
 target_include_directories(TGAReader PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(TGAReader PUBLIC m)

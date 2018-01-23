@@ -74,7 +74,7 @@ error:
  *      0x0E: (2 byte) Height
  *      0x10: (1 byte) PixelDepth
  *      0x11: (1 byte) ImageDescriptor
- *  Total Size: 18 Bytes
+ * Total Size: 18 Bytes
  */
 static int _read_tga_header(TGAImage *image, FILE *file)
 {
